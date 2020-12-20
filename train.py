@@ -12,7 +12,7 @@ from sklearn.naive_bayes import MultinomialNB  # 多项式分布贝叶斯
 from sklearn.linear_model import LogisticRegression  # 逻辑回归
 from sklearn.svm import SVC  # 支持向量机
 from sklearn import metrics  # 评估模型
-from utils import read_csv, read_pkl, save_pkl
+from utils import read_csv, read_pkl, save_pkl, tokenizer
 from config import DATA_PATH, MODEL_PATH, TRAIN_DATA_RATIO
 
 RETRAIN = True  # 是否重新训练
@@ -20,7 +20,7 @@ RETRAIN = True  # 是否重新训练
 
 def load_data():
     datasets = read_csv(os.path.join(DATA_PATH, "datasets.tsv"), filter_title=True, delimiter="\t")
-    X = [text for text, target in datasets]
+    X = [tokenizer(text) for text, target in datasets]
     y = [int(target) for text, target in datasets]
     return X, y
 
@@ -101,7 +101,7 @@ svm_model = get_svm_model(X_train, y_train, train=RETRAIN)
 
 # 测试集验证效果
 X_test, y_test = vectorizer.transform(X_test), y_test
-models = {"mnb_model": mnb_model, "lr_model": lr_model, "svm_model": svm_model}
+models = {"mnb": mnb_model, "lr": lr_model, "svm": svm_model}
 for name, model in models.items():
     print(f"{'=*= ' * 10}[{name}] {'=*= ' * 10}")
     y_pred = model.predict(X_test)
