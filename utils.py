@@ -5,23 +5,6 @@
 @File    : utils.py
 """
 import os, pickle, csv, re, jieba
-from functools import wraps
-
-
-def try_except(error_return):
-    def decorator(function):
-        @wraps(function)  # 不修改函数名以及注释文档
-        def wrapper(*args, **kwargs):
-            try:
-                res = function(*args, **kwargs)
-            except Exception as e:
-                res = error_return
-                print(f"==>>> function [{function.__name__}] error  =>> {e}")
-            return res
-
-        return wrapper
-
-    return decorator
 
 
 def read_pkl(filepath):
@@ -68,5 +51,5 @@ def tokenizer(text, language="en"):
     elif language == "zh":
         text = " ".join(jieba.cut(text))
     else:
-        pass
+        raise Exception("请选择正确的language")
     return text.strip()
