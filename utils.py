@@ -33,7 +33,7 @@ def save_pkl(filepath, data):
 def read_csv(filepath, filter_title=False, delimiter=","):
     data = []
     if os.path.exists(filepath):  # 如果目标文件存在:
-        with open(filepath, "r") as fr:
+        with open(filepath, "r", encoding="utf-8") as fr:
             data = csv.reader(fr, delimiter=delimiter)  # 逐行读取csv文件 迭代器变量
             if filter_title:
                 next(data)  # 过滤首行
