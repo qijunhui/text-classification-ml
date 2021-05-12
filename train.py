@@ -15,8 +15,6 @@ from sklearn import metrics  # 评估模型
 from utils import read_csv, read_pkl, save_pkl, tokenizer
 from config import DATA_PATH, MODEL_PATH, TRAIN_DATA_RATIO
 
-RETRAIN = True  # 是否重新训练
-
 
 def load_data():
     datasets = read_csv(os.path.join(DATA_PATH, "datasets.tsv"), filter_title=True, delimiter="\t")
@@ -82,6 +80,10 @@ def get_svm_model(X_train, y_train, train=False):
     return svm
 
 
+def judgment(*lst):
+    return [0 if sum(one) <= 1 else 1 for one in list(zip(lst[0], lst[1], lst[2]))]
+
+
 def assess(y_test, y_pred):
     print("accuracy on test data:\t", metrics.accuracy_score(y_test, y_pred))
     print("precision on test data:\t", metrics.precision_score(y_test, y_pred))  # 在计算精准或者召回的时候是以[1]为准计算
@@ -89,6 +91,8 @@ def assess(y_test, y_pred):
     print("f1 on test data:\t\t", metrics.f1_score(y_test, y_pred))
     print(f"confusion matrix:\n{metrics.confusion_matrix(y_test, y_pred, labels=[1, 0])}")  # [1]正例  [0]负例
 
+
+RETRAIN = True  # 是否重新训练
 
 X, y = load_data()  # 加载数据
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=TRAIN_DATA_RATIO, random_state=0)
@@ -102,8 +106,12 @@ svm_model = get_svm_model(X_train, y_train, train=RETRAIN)
 # 测试集验证效果
 X_test, y_test = vectorizer.transform(X_test), y_test
 models = {"mnb": mnb_model, "lr": lr_model, "svm": svm_model}
+models_predict = {"mnb": [], "lr": [], "svm": []}
 for name, model in models.items():
+    models_predict[name] = model.predict(X_test)
+models_predict["em"] = judgment(models_predict["mnb"], models_predict["lr"], models_predict["svm"])
+
+for name, predict in models_predict.items():
     print(f"{'=*= ' * 10}[{name}] {'=*= ' * 10}")
-    y_pred = model.predict(X_test)
-    assess(y_test, y_pred)
+    assess(y_test, predict)
     print(f"{'=*= ' * 10}[end_model] {'=*= ' * 10}\n")
